@@ -1,0 +1,61 @@
+services:
+  # Auth container — owns credentials + refresh token
+  # Login: docker exec -it agentbox-auth claude login
+  # Only the access token gets shared to agents (no refresh token)
+  auth:
+    build: ./auth
+    container_name: agentbox-auth
+    stdin_open: true
+    tty: true
+    volumes:
+      - claude-auth:/claude-auth
+      - claude-auth-priv:/root/.claude
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+
+  # Web dashboard
+  web:
+    build: ./web
+    container_name: agentbox-web
+    ports:
+      - "3333:3000"
+      - "3334:3001"  # auth terminal WebSocket
+    environment:
+      - GITHUB_ID=${GITHUB_ID:-}
+      - GITHUB_SECRET=${GITHUB_SECRET:-}
+      - ALLOWED_ORG=${ALLOWED_ORG:-}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      - AUTH_SECRET=${AUTH_SECRET:-dev-secret-change-me}
+      - AUTH_TRUST_HOST=true
+      - NEXTAUTH_URL=http://localhost:3333
+      - CLAUDE_AUTH_VOLUME=agentbox_claude-auth
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - auth
+      - agent-template
+      - falkordb
+    restart: unless-stopped
+
+  # Graph memory (Graphiti backend)
+  falkordb:
+    image: falkordb/falkordb:latest
+    container_name: agentbox-falkordb
+    ports:
+      - "6379:6379"
+    volumes:
+      - falkordb-data:/data
+    restart: unless-stopped
+
+  # Builds the agent image — doesn't stay running
+  agent-template:
+    build: ./container
+    image: agentbox-agent
+    entrypoint: ["echo", "image built"]
+    restart: "no"
+
+volumes:
+  claude-auth:
+  claude-auth-priv:
+  falkordb-data:

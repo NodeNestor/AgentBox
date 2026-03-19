@@ -1,0 +1,47 @@
+name: AgentBox Trigger
+
+on:
+  # Auto-trigger on issues
+  issues:
+    types: [opened, labeled]
+
+  # Auto-trigger on PRs
+  pull_request:
+    types: [opened, synchronize]
+
+  # Auto-trigger on pushes to main
+  push:
+    branches: [main, master]
+
+  # Trigger when someone @mentions agentbox in a comment
+  issue_comment:
+    types: [created]
+
+  # Manual trigger with custom prompt
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: "What should the agent do?"
+        required: true
+        type: string
+
+jobs:
+  trigger-agent:
+    runs-on: ubuntu-latest
+
+    # Only trigger on comments that mention @agentbox
+    if: >
+      github.event_name != 'issue_comment' ||
+      contains(github.event.comment.body, '@agentbox')
+
+    steps:
+      - name: Trigger AgentBox
+        run: |
+          # Send the full GitHub event payload to AgentBox webhook
+          curl -s -X POST "${{ secrets.AGENTBOX_URL }}/api/webhook" \
+            -H "Content-Type: application/json" \
+            -H "X-GitHub-Event: ${{ github.event_name }}" \
+            -d '${{ toJson(github.event) }}' \
+            | jq .
+        env:
+          AGENTBOX_URL: ${{ secrets.AGENTBOX_URL }}
