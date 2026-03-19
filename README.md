@@ -3,11 +3,13 @@
 AI agents in containers. Chat with them, watch them work, trigger them from GitHub.
 
 <p align="center">
-  <img src="docs/login-desktop.png" alt="AgentBox Login — Desktop" width="600" />
+  <img src="docs/dashboard-desktop.png" alt="AgentBox Dashboard — Desktop" width="700" />
 </p>
 
 <p align="center">
-  <img src="docs/login-mobile.png" alt="AgentBox Login — Mobile" width="200" />
+  <img src="docs/dashboard-mobile.png" alt="AgentBox Dashboard — Mobile" width="220" />
+  &nbsp;&nbsp;&nbsp;
+  <img src="docs/login-mobile.png" alt="AgentBox Login — Mobile" width="220" />
 </p>
 
 ```

@@ -2,6 +2,7 @@ import { auth, signIn } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 export default async function Home() {
+  if (process.env.DEV_BYPASS === "true") redirect("/dashboard");
   const session = await auth();
   if (session) redirect("/dashboard");
 
